@@ -7,17 +7,44 @@ using System.Text;
 
 namespace NodeModel
 {
-    public class NodeModelCreator { public static INodeModel Create() => NodeModel_X.Create(); }
+    public class NodeModelCreator
+    {
+        public static INodeModel Create() => NodeModel_X.Create();
+    }
 
     public class NodeModel_X : Model_X, INodeModel
     {
         #region Create_NodeModel_X  ===========================================
         static public INodeModel Create() => new NodeModel_X();
 
-        private NodeModel_X() : base(new Chef())
+        private NodeModel_X() : base(null) { } 
+        #endregion
+
+        #region NodeModelProperties  ==========================================
+        public string ModelName
         {
+            get { return ItemRef is null ? "<none>" : ChefRef.GetRepositoryName(); }
+            set { Set(ref _modelName, value); }
         }
-         #endregion
+        private string _modelName;
+        public string ModelFullName
+        {
+            get { return ItemRef is null ? "Try New or Open" : ChefRef.GetFullRepositoryName(); }
+            set { Set(ref _modelFullName, value); }
+        }
+        private string _modelFullName;
+        #endregion
+
+        #region Refresh  ======================================================
+        public void Refresh()
+        {
+            _modelName = string.Empty;
+            _modelFullName = string.Empty;
+
+            ModelName = "refresh";
+            ModelFullName = "refresh";
+        }
+        #endregion
 
         #region CreateNodeType  ===============================================
         public INodeType CreateNodeType()
@@ -38,28 +65,37 @@ namespace NodeModel
         #region Load  =========================================================
         public bool Load(IRepository repository)
         {
-            throw new NotImplementedException();
+            ItemRef = new Chef(repository);
+            Refresh();
+            return true;
         }
         #endregion
 
         #region Reload  =======================================================
         public bool Reload()
         {
-            throw new NotImplementedException();
+            if (ItemRef is null) return false;
+            if (ChefRef.Repository is null) return false;
+            return false;
         }
         #endregion
 
         #region Save  =========================================================
         public bool Save()
         {
-            throw new NotImplementedException();
+            if (ItemRef is null) return false;
+            if (ChefRef.Repository is null) return false;
+            ChefRef.SaveToRepository();
+            return true;
         }
         #endregion
 
         #region SaveAs  =======================================================
         public bool SaveAs(IRepository repository)
         {
-            throw new NotImplementedException();
+            if (ItemRef is null) return false;
+            ChefRef.SaveToRepository(repository);
+            return true;
         }
         #endregion
 
@@ -99,6 +135,7 @@ namespace NodeModel
         {
             _allNodeTypes.Remove(nodeType);
         }
+
         public ObservableCollection<INodeType> AllNodeTypes => _allNodeTypes;
         #endregion
     }

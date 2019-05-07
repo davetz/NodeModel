@@ -6,13 +6,26 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Style="{StaticResource PageStyle}"
     mc:Ignorable="d">
-    <Grid
-        x:Name="ContentArea"
-        Margin="{StaticResource MediumLeftRightMargin}">
-        <Grid
-            Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
-            <!--The SystemControlPageBackgroundChromeLowBrush background represents where you should place your content. 
-                Place your content here.-->
-        </Grid>
+    <Grid x:Name="ContentArea" Margin="{StaticResource MediumLeftRightMargin}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions> 
+       <TextBlock Text="Node Model Repository" HorizontalAlignment="Left" Margin="20,0,0,0" VerticalAlignment="Center" FontSize="24"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" >
+            <TextBlock Margin="20,0,10,0" Text="Current Model:" TextAlignment="Left" FontSize="20"/>
+            <TextBlock x:Name="ModelName" Margin="10,0,10,0" Text="{Binding Path=ModelName, Mode=OneWay}" ToolTipService.ToolTip="{Binding Path=ModelFullName, Mode=OneWay}" TextAlignment="Right" FontSize="20" />
+        </StackPanel>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" >
+            <Button x:Name="NewModel" Content="New" Margin="20,0,10,0" Click="NewModel_Click"/>
+            <Button x:Name="OpenModel" Content="Open" Margin="10,0,10,0" Click="OpenModel_Click"/>
+            <Button x:Name="SaveModel" Content="Save" Margin="10,0,10,0" Click="SaveModel_Click"/>
+            <Button x:Name="ReloadModel" Content="Reload" Margin="10,0,10,0" Click="ReloadModel_Click"/>
+            <Button x:Name="SaveAsModel" Content="Save As" Margin="10,0,10,0" Click="SaveAsModel_Click"/>
+        </StackPanel>
+        <StackPanel Grid.Row="3" Orientation="Horizontal" >
+        </StackPanel>
     </Grid>
 </Page>

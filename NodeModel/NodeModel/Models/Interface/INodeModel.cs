@@ -10,6 +10,22 @@ namespace NodeModel
     public interface INodeModel : INotifyPropertyChanged
     {
         /// <summary>
+        /// The models name
+        /// </summary>
+        string ModelName { get; }
+
+        /// <summary>
+        /// The models full path name
+        /// </summary>
+        string ModelFullName { get; }
+
+        /// <summary>
+        /// Refresh all the bindings
+        /// </summary>
+        void Refresh();
+
+
+        /// <summary>
         /// Load from a repository
         /// </summary>
         bool Load(IRepository repository);

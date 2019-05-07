@@ -36,8 +36,8 @@ namespace NodeModel
                 Repository.Read(this);
         }
 
-        private string GetLongRepositoryName() => (Repository == null) ? NullStorageFileName : Repository.FullName;
-        private string GetRepositoryName() => (Repository == null) ? NullStorageFileName : Repository.Name;
+        internal string GetFullRepositoryName() => (Repository == null) ? NullStorageFileName : Repository.FullName;
+        internal string GetRepositoryName() => (Repository == null) ? NullStorageFileName : Repository.Name;
         private string NullStorageFileName => $"New Model #{_newChefNumber}";
         //private string NullStorageFileName => $"{_localize(GetNameKey(Trait.NewModel))} #{_newChefNumber}";
 
