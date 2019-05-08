@@ -4,7 +4,7 @@ using System.Text;
 
 namespace NodeModel
 {
-    public partial class Chef : StoreOf<Store>
+    internal partial class Chef : StoreOf<Store>
     {
         static int _newChefCount;
         private int _newChefNumber;
