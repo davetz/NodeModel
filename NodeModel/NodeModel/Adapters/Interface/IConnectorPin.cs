@@ -1,33 +1,35 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Numerics;
+using Windows.Foundation;
 
 namespace NodeModel
 {
     public interface IConnectorPin : INotifyPropertyChanged
     {
         /// <summary>
-        /// Name assign to the propertyType
+        /// Name assign to the pin
         /// </summary>
         string Name { get; set; }
 
         /// <summary>
-        /// Optional tooltip text of the propertyType
+        /// Optional tooltip text of the pin
         /// </summary>
         string ToolTip { get; set; }
 
         /// <summary>
-        /// Optional description of the propertyType
+        /// Optional description of the pin
         /// </summary>
         string Description { get; set; }
 
         /// <summary>
-        /// Data type of property value
+        /// Graphics center point location the pin 
         /// </summary>
-        string ValueType { get; set; }
+        Vector2 CenterPoint { get; }
 
         /// <summary>
-        /// List of available value types 
+        /// Graphics rectangle bounding the pin 
         /// </summary>
-        IList<string> ValueTypes { get; }
+        Rect BoundingRect { get; }
     }
 }

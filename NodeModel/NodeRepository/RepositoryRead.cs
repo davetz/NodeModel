@@ -54,7 +54,7 @@ namespace NodeRepository
             {
                 if (fileFormat == _fileFormat_1)
                 {
-                    var (_, itemIndex) = chef.GetItemIndex();
+                    var (minIndes, maxIndes, itemIndex) = chef.GetItemIndex();
                     items = ReadHeader_1(r, chef, itemIndex );
                     vector = new Action<Chef, DataReader, Item[]>[]
                     {
@@ -102,7 +102,8 @@ namespace NodeRepository
         #region ReadHeader_1  =================================================
         private Item[] ReadHeader_1(DataReader r, Chef chef, Dictionary<Item, int> itemIndex)
         {
-            var count = r.ReadInt32();
+            var first = r.ReadInt32(); // first external index
+            var count = r.ReadInt32(); // last external index
 
             var items = new Item[count];
 
@@ -208,17 +209,34 @@ namespace NodeRepository
                 var rx = new RelationX(store);
                 items[index] = rx;
 
-                var b = r.ReadByte();
-                if ((b & B1) != 0) rx.SetState(r.ReadUInt16());
-                if ((b & B2) != 0) rx.Name = ReadString(r);
-                if ((b & B3) != 0) rx.Summary = ReadString(r);
-                if ((b & B4) != 0) rx.Description = ReadString(r);
-                if ((b & B5) != 0) rx.Pairing = (Pairing)r.ReadByte();
-                if ((b & B6) != 0) r.ReadInt16();
-                if ((b & B6) != 0) r.ReadInt16();
-                var keyCount = ((b & B7) != 0) ? r.ReadInt32() : 0;
-                var valCount = ((b & B7) != 0) ? r.ReadInt32() : 0;
+                var b = r.ReadUInt16();
+                if ((b & S1) != 0) rx.SetState(r.ReadUInt16());
+                if ((b & S2) != 0) rx.Name = ReadString(r);
+                if ((b & S3) != 0) rx.Summary = ReadString(r);
+                if ((b & S4) != 0) rx.Description = ReadString(r);
+                if ((b & S5) != 0) rx.Pairing = (Pairing)r.ReadByte();
+                if ((b & S6) != 0) r.ReadInt16();
+                if ((b & S6) != 0) r.ReadInt16();
+                var keyCount = ((b & S7) != 0) ? r.ReadInt32() : 0;
+                var valCount = ((b & S7) != 0) ? r.ReadInt32() : 0;
                 rx.Initialize(keyCount, valCount);
+
+                var inputPin = new RelationX.ConnectorPin();
+                if ((b & S11) != 0) inputPin.Name = ReadString(r);
+                if ((b & S12) != 0) inputPin.Summary = ReadString(r);
+                if ((b & S13) != 0) inputPin.Description = ReadString(r);
+                inputPin.Offset = (r.ReadByte(), r.ReadByte());
+                inputPin.Size = (r.ReadByte(), r.ReadByte());
+                rx.InputPin = inputPin;
+
+                var outputPin = new RelationX.ConnectorPin();
+                if ((b & S14) != 0) outputPin.Name = ReadString(r);
+                if ((b & S15) != 0) outputPin.Summary = ReadString(r);
+                if ((b & S16) != 0) outputPin.Description = ReadString(r);
+                outputPin.Offset = (r.ReadByte(), r.ReadByte());
+                outputPin.Size = (r.ReadByte(), r.ReadByte());
+                rx.OutputPin = outputPin;
+
             }
             var mark = (Mark)r.ReadByte();
             if (mark != Mark.RelationXEnding) throw new Exception($"Expected RelationXEnding marker, instead got {mark}");

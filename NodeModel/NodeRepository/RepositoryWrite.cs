@@ -39,13 +39,13 @@ namespace NodeRepository
         private void Write(Chef chef, DataWriter w)
         {
             var fileFormat = _fileFormat_1;
-            var (maxIndex, itemIndex) = chef.GetItemIndex();
+            var (minIndex, maxIndex, itemIndex) = chef.GetItemIndex();
             var relationList = chef.GetRelationList();
 
             w.WriteInt32(0);            // file identifier: a zero int spacer
             w.WriteGuid(fileFormat);    // followed by the file format guid
 
-            WriteHeader(chef, w, maxIndex);
+            WriteHeader(chef, w, minIndex, maxIndex);
 
             if (chef.TableXStore.Count > 0) WriteTableX(chef, w, itemIndex);
             if (chef.ColumnXStore.Count > 0) WriteColumnX(chef, w, itemIndex);
@@ -60,9 +60,10 @@ namespace NodeRepository
         #endregion
 
         #region WriteHeader  ==================================================
-        private void WriteHeader(Chef chef, DataWriter w, int maxIndex)
+        private void WriteHeader(Chef chef, DataWriter w, int minIndex, int maxIndex)
         {
-            w.WriteInt32(maxIndex);
+            w.WriteInt32(minIndex); //index of first external item
+            w.WriteInt32(maxIndex); //index of last external item
         }
         #endregion
 
@@ -156,22 +157,51 @@ namespace NodeRepository
                 var keyCount = rx.KeyCount;
                 var valCount = rx.ValueCount;
 
-                var b = BZ;
-                if (rx.HasState()) b |= B1;
-                if (!string.IsNullOrWhiteSpace(rx.Name)) b |= B2;
-                if (!string.IsNullOrWhiteSpace(rx.Summary)) b |= B3;
-                if (!string.IsNullOrWhiteSpace(rx.Description)) b |= B4;
-                if (rx.Pairing != Pairing.OneToMany) b |= B5;
-                if ((keyCount + valCount) > 0) b |= B7;
+                var b = SZ;
+                if (rx.HasState()) b |= S1;
+                if (!string.IsNullOrWhiteSpace(rx.Name)) b |= S2;
+                if (!string.IsNullOrWhiteSpace(rx.Summary)) b |= S3;
+                if (!string.IsNullOrWhiteSpace(rx.Description)) b |= S4;
+                if (rx.Pairing != Pairing.OneToMany) b |= S5;
+                if ((keyCount + valCount) > 0) b |= S7;
 
-                w.WriteByte(b);
-                if ((b & B1) != 0) w.WriteUInt16(rx.GetState());
-                if ((b & B2) != 0) WriteString(w, rx.Name);
-                if ((b & B3) != 0) WriteString(w, rx.Summary);
-                if ((b & B4) != 0) WriteString(w, rx.Description);
-                if ((b & B5) != 0) w.WriteByte((byte)rx.Pairing);
-                if ((b & B7) != 0) w.WriteInt32(keyCount);
-                if ((b & B7) != 0) w.WriteInt32(valCount);
+                var inputPin = rx.InputPin;
+                var outputPin = rx.OutputPin;
+
+                if (!string.IsNullOrWhiteSpace(inputPin.Name)) b |= S11;
+                if (!string.IsNullOrWhiteSpace(inputPin.Summary)) b |= S12;
+                if (!string.IsNullOrWhiteSpace(inputPin.Description)) b |= S13;
+
+                if (!string.IsNullOrWhiteSpace(outputPin.Name)) b |= S14;
+                if (!string.IsNullOrWhiteSpace(outputPin.Summary)) b |= S15;
+                if (!string.IsNullOrWhiteSpace(outputPin.Description)) b |= S16;
+
+                w.WriteUInt16(b);
+                if ((b & S1) != 0) w.WriteUInt16(rx.GetState());
+                if ((b & S2) != 0) WriteString(w, rx.Name);
+                if ((b & S3) != 0) WriteString(w, rx.Summary);
+                if ((b & S4) != 0) WriteString(w, rx.Description);
+                if ((b & S5) != 0) w.WriteByte((byte)rx.Pairing);
+                if ((b & S7) != 0) w.WriteInt32(keyCount);
+                if ((b & S7) != 0) w.WriteInt32(valCount);
+
+                if ((b & S11) != 0) WriteString(w, inputPin.Name);
+                if ((b & S12) != 0) WriteString(w, inputPin.Summary);
+                if ((b & S13) != 0) WriteString(w, inputPin.Description);
+
+                w.WriteByte(inputPin.Offset.DX);
+                w.WriteByte(inputPin.Offset.DY);
+                w.WriteByte(inputPin.Size.W);
+                w.WriteByte(inputPin.Size.H);
+
+                if ((b & S14) != 0) WriteString(w, outputPin.Name);
+                if ((b & S15) != 0) WriteString(w, outputPin.Summary);
+                if ((b & S16) != 0) WriteString(w, outputPin.Description);
+
+                w.WriteByte(outputPin.Offset.DX);
+                w.WriteByte(outputPin.Offset.DY);
+                w.WriteByte(outputPin.Size.W);
+                w.WriteByte(outputPin.Size.H);
             }
             w.WriteByte((byte)Mark.RelationXEnding); // itegrity marker
         }

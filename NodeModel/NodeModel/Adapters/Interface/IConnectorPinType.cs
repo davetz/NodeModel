@@ -8,9 +8,24 @@ namespace NodeModel
     public interface IConnectorPinType : INotifyPropertyChanged
     {
         /// <summary>
-        /// The name of this connector pin
+        /// Name assign to the PinType
         /// </summary>
         string Name { get; set; }
+
+        /// <summary>
+        /// Optional tooltip text of the PinType
+        /// </summary>
+        string ToolTip { get; set; }
+
+        /// <summary>
+        /// Optional description of the PinType
+        /// </summary>
+        string Description { get; set; }
+
+        /// <summary>
+        /// Optional size (Width, Height) of the PinType
+        /// </summary>
+        Size Size { get; set; }
 
         /// <summary>
         /// EdgeType owner

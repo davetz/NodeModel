@@ -51,11 +51,17 @@ namespace NodeModel
             foreach (var rx in RelationXStore.Items) { list.Add(rx); }
             return list;
         }
-        internal (int maxIndex, Dictionary<Item, int> itemIndex) GetItemIndex()
+        /// <summary>
+        /// Get Item-to-Index dictionary specify min/max external indexes
+        /// </summary>
+        /// <returns></returns>
+        internal (int minIndex, int maxIndex, Dictionary<Item, int> itemIndex) GetItemIndex()
         {
-            // count all items that have guids
+            const int firstExternalIndex = 21;
+
+            // count items that can be referenced by index
             //=============================================
-            int count = 43; // allow for static items
+            int count = firstExternalIndex;
 
             foreach (var item in TableXStore.Items)
             {
@@ -74,7 +80,7 @@ namespace NodeModel
 
             // internally defined items
             //=============================================
-            int j = 0; 
+            int j = 0;
             itemIndex.Add(Dummy, j++);
             itemIndex.Add(TableX_ColumnX, j++);
             itemIndex.Add(TableX_ChildRelationX, j++);
@@ -82,7 +88,7 @@ namespace NodeModel
 
             // externally defined items
             //=============================================
-            j = 10; //for debugging
+            j = firstExternalIndex;
 
             foreach (var itm in TableXStore.Items)
             {
@@ -107,7 +113,12 @@ namespace NodeModel
                     itemIndex.Add(child, j++);
                 }
             }
-            return (j, itemIndex);
+
+            var externalIndexMinLimit = firstExternalIndex - 1;
+
+            var externalIndexMaxLimit = j;
+
+            return (externalIndexMinLimit, externalIndexMaxLimit, itemIndex);
         }
         #endregion
     }

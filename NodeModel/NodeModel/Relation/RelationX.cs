@@ -10,10 +10,17 @@ namespace NodeModel
         internal string Summary;
         internal string Description;
 
-        internal (byte DX, byte DY) Offset1;
-        internal (byte DX, byte DY) Offset2;
-        internal (byte W, byte H) Size1;
-        internal (byte W, byte H) Size2;
+        internal ConnectorPin InputPin = new ConnectorPin();
+        internal ConnectorPin OutputPin = new ConnectorPin();
+        internal struct ConnectorPin
+        {
+            internal string Name;
+            internal string Summary;
+            internal string Description;
+
+            internal (byte DX, byte DY) Offset; //delta from center of nodeType
+            internal (byte W, byte H) Size;     //used to calculate boundingRect of pin
+        }
 
         #region Constructors  =================================================
         internal RelationX(StoreOf<RelationX> owner)

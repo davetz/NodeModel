@@ -28,7 +28,7 @@ namespace NodeModel
 
         // NodeType Graphic Diagram Properties
         //=====================================================================
-        // You can create the nodeModel metadate graphicly (pa
+        // You can create the nodeModel metadate graphicly
         // using pallets, drag/drop, pickerTools, propertyBoxes,.. etc
         /// <summary>
         /// Graphics location of the nodeType on metadata diagram
