@@ -10,9 +10,9 @@ using Windows.Foundation;
 
 namespace NodeModel
 {
-    public class Node_X : Model_X, INode 
+    public class A_Node : A_Model, INode 
     {
-        internal Node_X(RowX itemRef) : base(itemRef)
+        internal A_Node(RowX itemRef) : base(itemRef)
         {
         }
         RowX RowXRef => ItemRef as RowX;

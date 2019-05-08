@@ -8,7 +8,7 @@ using System.Text;
 
 namespace NodeModel
 {
-    public class EdgeType_X : IEdgeType
+    public class A_EdgeType : IEdgeType
     {
         public string Name { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string ToolTip { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }

@@ -8,8 +8,12 @@ using System.Text;
 
 namespace NodeModel
 {
-    public class PropertyModel : IProperty
+    public class A_Property : A_Model, IProperty
     {
+        ColumnX ColumnXRef => ItemRef as ColumnX;
+
+        internal A_Property(ColumnX itemRef) : base(itemRef) { }
+
         public string Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public string ValueType => throw new NotImplementedException();
@@ -34,22 +38,5 @@ namespace NodeModel
         public string[] StringArray { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public DateTime DateTimeValue { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public DateTime[] DateTimeArray { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        #region INotifyPropertyChanged  =======================================
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void Set<T>(ref T storage, T value, [CallerMemberName]string propertyName = null)
-        {
-            if (Equals(storage, value))
-            {
-                return;
-            }
-
-            storage = value;
-            OnPropertyChanged(propertyName);
-        }
-
-        private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        #endregion
     }
 }

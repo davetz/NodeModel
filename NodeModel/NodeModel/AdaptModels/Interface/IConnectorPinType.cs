@@ -5,11 +5,13 @@ using Windows.Foundation;
 
 namespace NodeModel
 {
-    /// <summary>
-    /// Graphicaly place/move an edgeType's connector pins
-    /// </summary>
     public interface IConnectorPinType : INotifyPropertyChanged
     {
+        /// <summary>
+        /// The name of this connector pin
+        /// </summary>
+        string Name { get; set; }
+
         /// <summary>
         /// EdgeType owner
         /// </summary>
@@ -21,7 +23,7 @@ namespace NodeModel
         bool IsOutputPin { get; }
 
 
-        bool CanSetStartintPoint(Vector2 location);
+        bool CanSetStartingPoint(Vector2 location);
         bool SetStartingPoint(Vector2 location);
 
 

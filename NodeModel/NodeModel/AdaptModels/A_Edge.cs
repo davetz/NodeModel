@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace NodeModel
 {
-    public class Edge_M : IEdge
+    public class A_Edge : IEdge
     {
         public Vector2 XYPin1
         {

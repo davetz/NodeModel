@@ -9,15 +9,15 @@ namespace NodeModel
 {
     public class NodeModelCreator
     {
-        public static INodeModel Create() => NodeModel_X.Create();
+        public static INodeModel Create() => A_NodeModel.Create();
     }
 
-    public class NodeModel_X : Model_X, INodeModel
+    public class A_NodeModel : A_Model, INodeModel
     {
         #region Create_NodeModel_X  ===========================================
-        static public INodeModel Create() => new NodeModel_X();
+        static public INodeModel Create() => new A_NodeModel();
 
-        private NodeModel_X() : base(null) { } 
+        private A_NodeModel() : base(null) { } 
         #endregion
 
         #region NodeModelProperties  ==========================================
@@ -49,7 +49,7 @@ namespace NodeModel
         #region CreateNodeType  ===============================================
         public INodeType CreateNodeType()
         {
-            var nodeType = new NodeType_X(ChefRef.CreateTableX());
+            var nodeType = new A_NodeType(ChefRef.CreateTableX());
             AddNodeType(nodeType);
             return nodeType;
         }

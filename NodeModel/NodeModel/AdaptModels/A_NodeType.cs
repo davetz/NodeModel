@@ -6,11 +6,11 @@ using Windows.Foundation;
 
 namespace NodeModel
 {
-    public class NodeType_X : Model_X, INodeType
+    public class A_NodeType : A_Model, INodeType
     {
         TableX TableXRef => ItemRef as TableX;
 
-        internal NodeType_X(TableX itemRef) : base(itemRef) { }
+        internal A_NodeType(TableX itemRef) : base(itemRef) { }
 
 
         #region NodeTypeProperty  =============================================

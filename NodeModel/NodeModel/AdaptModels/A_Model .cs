@@ -8,14 +8,14 @@ using System.Text;
 
 namespace NodeModel
 {
-    public class Model_X
+    public class A_Model
     {
         protected Item ItemRef;
         protected byte ModelDelta = 222;
         protected Chef ChefRef => ItemRef.GetChef();
 
 
-        internal Model_X(Item itemRef) { ItemRef = itemRef; }
+        internal A_Model(Item itemRef) { ItemRef = itemRef; }
 
         #region INotifyPropertyChanged  =======================================
         public event PropertyChangedEventHandler PropertyChanged;
