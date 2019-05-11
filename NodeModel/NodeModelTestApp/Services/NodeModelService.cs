@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.UI.Core;
-using NodeRepository;
+using NodeModelRepository;
 using System.Collections.Generic;
 
 namespace NodeModelTestApp.Services

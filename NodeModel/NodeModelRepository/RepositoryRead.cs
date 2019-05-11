@@ -9,7 +9,7 @@ using NodeModel;
 using Windows.Storage;
 using Windows.Storage.Streams;
 
-namespace NodeRepository
+namespace NodeModelRepository
 {
     public partial class Repository
     {
@@ -137,11 +137,10 @@ namespace NodeRepository
 
                 var b = r.ReadByte();
                 if ((b & B1) != 0) tx.Name = ReadString(r);
-                if ((b & B2) != 0) tx.Summary = ReadString(r);
+                if ((b & B2) != 0) tx.ToolTip = ReadString(r);
                 if ((b & B3) != 0) tx.Description = ReadString(r);
 
                 tx.Center = (r.ReadSingle(), r.ReadSingle());
-                tx.Radius = (r.ReadByte(), r.ReadByte());
 
                 var rxCount = r.ReadInt32();
                 if (rxCount < 0) throw new Exception($"Invalid row count {count}");
@@ -154,6 +153,10 @@ namespace NodeRepository
 
                     var rx = new RowX(tx);
                     items[index2] = rx;
+
+                    var d = r.ReadByte();
+                    if ((d & B1) != 0) rx.Name = ReadString(r);
+                    if ((d & B2) != 0) rx.ToolTip = ReadString(r);
 
                     //in this application each row is a graph node
                     rx.Center= (r.ReadSingle(), r.ReadSingle());

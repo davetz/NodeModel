@@ -1,0 +1,50 @@
+﻿<UserControl
+    x:Class="NodeModelCanvas.ModelCanvas"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:NodeModelCanvas"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:canvas="using:Microsoft.Graphics.Canvas.UI.Xaml"
+    Unloaded="ModelCanvas_Unloaded"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="500">
+
+    <UserControl.Resources>
+
+        <Style x:Key="RadioButtonStyle" TargetType="RadioButton">
+            <Setter Property="Margin" Value="2,0,2,0" />
+            <Setter Property="GroupName" Value="G1" />
+            <Setter Property="MinWidth" Value="60" />
+            <Setter Property="Padding" Value="4,6,0,0" />
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="32"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Margin="0,0,0 4">
+            <TextBlock Text="Tap/Drag-To" VerticalAlignment="Center" Margin="4,0,2,0" FontWeight="Medium" FontSize="12"/>
+            <RadioButton x:Name="ViewSelect" Content="View" Style="{StaticResource RadioButtonStyle}" IsChecked="True" Checked="ViewSelect_Checked"/>
+            <RadioButton x:Name="MoveSelect" Content="Move" Style="{StaticResource RadioButtonStyle}" Checked="MoveSelect_Checked"/>
+            <RadioButton x:Name="LinkSelect" Content="Link" Style="{StaticResource RadioButtonStyle}" Checked="LinkSelect_Checked"/>
+            <RadioButton x:Name="CopySelect" Content="Copy" Style="{StaticResource RadioButtonStyle}" Checked="CopySelect_Checked"/>
+            <RadioButton x:Name="CreateSelect" Content="Create" Style="{StaticResource RadioButtonStyle}" Checked="CreateSelect_Checked" />
+            <RadioButton x:Name="OperateSelect" Content="Operate" Style="{StaticResource RadioButtonStyle}" Checked="OperateSelect_Checked" />
+        </StackPanel>
+
+        <Grid  Background="DarkSlateGray" Grid.Row="1" >
+            <canvas:CanvasControl x:Name="EditorCanvas"
+                                          Draw="EditorCanvas_Draw"
+                                          Loaded="EditorCanvas_Loaded"
+                                          PointerMoved="EditorCanvas_PointerMoved"
+                                          PointerPressed="EditorCanvas_PointerPressed"
+                                          PointerReleased="EditorCanvas_PointerReleased"/>
+        </Grid>
+
+    </Grid>
+</UserControl>

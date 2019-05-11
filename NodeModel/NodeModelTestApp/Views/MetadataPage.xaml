@@ -4,14 +4,13 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:canvas="using:Microsoft.Graphics.Canvas.UI.Xaml"
+    xmlns:ctrl="using:NodeModelCanvas"
     Style="{StaticResource PageStyle}"
-    Unloaded="Page_Unloaded"
     mc:Ignorable="d">
     <Page.Resources>
         
         <Style x:Key="PropertyPanelStyle" TargetType="StackPanel">
-            <Setter Property="Width" Value="240"/>
+            <Setter Property="MinWidth" Value="240"/>
             <Setter Property="Margin" Value="0,0,0,4"/>
             <Setter Property="Orientation" Value="Vertical" />
         </Style>
@@ -19,7 +18,7 @@
         <Style x:Key="TitleStyle" TargetType="TextBlock">
             <Setter Property="MinWidth" Value="240"/>
             <Setter Property="TextAlignment" Value="Center" />
-            <Setter Property="TextDecorations" Value="Underline" />
+            <Setter Property="Margin" Value="0,4,0,0" />
             <Setter Property="FontSize" Value="16"/>
         </Style>
         
@@ -42,11 +41,6 @@
             <Setter Property="FontSize" Value="12" />
         </Style>
 
-        <Style x:Key="RadioButtonStyle" TargetType="RadioButton">
-            <Setter Property="Margin" Value="2,0,2,0" />
-            <Setter Property="GroupName" Value="G1" />
-        </Style>
-
         <Style x:Key="ActionButtonStyle" TargetType="Button">
             <Setter Property="HorizontalAlignment" Value="Center" />
         </Style>
@@ -56,42 +50,34 @@
         x:Name="ContentArea"
         Margin="{StaticResource MediumLeftRightMargin}">
         <Grid Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="32" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <StackPanel Orientation="Horizontal" Margin="0,0,0 4">
-                <TextBlock Text="Tap/Drag" VerticalAlignment="Center" Margin="4,0,4,0" FontWeight="Bold"/>
-                <RadioButton Content="To Select" Style="{StaticResource RadioButtonStyle}" />
-                <RadioButton Content="Create NodeType" Style="{StaticResource RadioButtonStyle}" />
-                <RadioButton Content="Move NodeType" Style="{StaticResource RadioButtonStyle}" />
-                <RadioButton Content="Link In-to-Out" Style="{StaticResource RadioButtonStyle}" />
-                <RadioButton Content=" Move Connector Pin" Style="{StaticResource RadioButtonStyle}" />
-            </StackPanel>
             <Grid Grid.Row="1" >
                 <Grid.ColumnDefinitions >
                     <ColumnDefinition Width="240"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                
-                <StackPanel Style="{StaticResource PropertyPanelStyle}">
-                    <StackPanel x:Name="NodeTypePanel" Style="{StaticResource PropertyPanelStyle}">
-                        <TextBlock Text="Node Type" Style="{StaticResource TitleStyle}"/>
-                        <TextBlock Text="Name:" Style="{StaticResource LabelStyle}"/>
-                        <TextBox  Style="{StaticResource ValueTextBoxStyle}" />
-                        <TextBlock Text="Tooltip:" Style="{StaticResource LabelStyle}"/>
-                        <TextBox Style="{StaticResource ValueTextBoxStyle}" />
-                        <TextBlock Text="Description:" Style="{StaticResource LabelStyle}"/>
-                        <TextBox Style="{StaticResource DescriptionTextBoxStyle}" />
+                <Grid>
+                    <StackPanel Style="{StaticResource PropertyPanelStyle}">
+                        <TextBlock Text="Selected Item(s)" TextAlignment="Center" Margin="0,6,0,0"/>
+                        <StackPanel x:Name="NodeTypePanel" Style="{StaticResource PropertyPanelStyle}" Visibility="{Binding Path=NodeTypePanel_Visible, Mode=OneWay}">
+                            <TextBlock Text="Node Type" Style="{StaticResource TitleStyle}"/>
+                            <TextBlock Text="Name:" Style="{StaticResource LabelStyle}"/>
+                            <TextBox  Style="{StaticResource ValueTextBoxStyle}" Text="{Binding Path=NodeType_Name, Mode=TwoWay}"/>
+
+                            <TextBlock Text="Tooltip:" Style="{StaticResource LabelStyle}" />
+                            <TextBox Style="{StaticResource ValueTextBoxStyle}" Text="{Binding Path=NodeType_ToolTip, Mode=TwoWay}"/>
+
+                            <TextBlock Text="Description:" Style="{StaticResource LabelStyle}"/>
+                            <TextBox Style="{StaticResource DescriptionTextBoxStyle}" Text="{Binding Path=NodeType_Description, Mode=TwoWay}"/>
+                        </StackPanel>
+                        <StackPanel x:Name="PropertyTypePanel" Style="{StaticResource PropertyPanelStyle}">
+                        </StackPanel>
+                        <StackPanel x:Name="EdgeTypePanel" Style="{StaticResource PropertyPanelStyle}">
+                        </StackPanel>
                     </StackPanel>
-                    <StackPanel x:Name="PropertyTypePanel" Style="{StaticResource PropertyPanelStyle}">
-                    </StackPanel>
-                    <StackPanel x:Name="EdgeTypePanel" Style="{StaticResource PropertyPanelStyle}">
-                    </StackPanel>
-                </StackPanel>
-                
-                <Grid Background="DarkSlateGray" Grid.Column="1" Margin="4,0,0,0">
-                    <canvas:CanvasControl x:Name="EditorCanvas" Draw="EditorCanvas_Draw" Loaded="EditorCanvas_Loaded" />
+                </Grid>
+
+                <Grid Grid.Column="1" Margin="4,0,0,0">
+                    <ctrl:ModelCanvas x:Name="ModelCanvas"/>
                 </Grid>
             </Grid>
         </Grid>

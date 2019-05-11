@@ -17,9 +17,15 @@ namespace NodeModel
 
         internal A_Model(Item itemRef) { ItemRef = itemRef; }
 
+        protected void SetItemRef(Item item) => ItemRef = item; 
+
         #region INotifyPropertyChanged  =======================================
         public event PropertyChangedEventHandler PropertyChanged;
 
+        protected void PropertyChange(string propertyName)
+        {
+            OnPropertyChanged(propertyName);
+        }
         protected void Set<T>(ref T storage, T value, [CallerMemberName]string propertyName = null)
         {
             if (Equals(storage, value))

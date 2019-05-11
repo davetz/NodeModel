@@ -40,8 +40,8 @@ namespace NodeModel
             }
             {
                 var p = _tableXSummaryProperty = new PropertyOf<TableX, string>(PropertyStore, Trait.TableSummary_P);
-                p.GetValFunc = (item) => p.Cast(item).Summary;
-                p.SetValFunc = (item, value) => { p.Cast(item).Summary = value; return true; };
+                p.GetValFunc = (item) => p.Cast(item).ToolTip;
+                p.SetValFunc = (item, value) => { p.Cast(item).ToolTip = value; return true; };
                 p.Value = new StringValue(p);
                 props.Add(p);
             }

@@ -220,6 +220,14 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\NodeModelCanvas\NodeModelCanvas.csproj">
+      <Project>{d57cd0a1-d34e-4cc7-873a-e6a3793a5857}</Project>
+      <Name>NodeModelCanvas</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NodeModelRepository\NodeModelRepository.csproj">
+      <Project>{2c63e8fd-f1a3-4dfb-a93c-0afd461e37d9}</Project>
+      <Name>NodeModelRepository</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NodeModelTestApp.Core\NodeModelTestApp.Core.csproj">
       <Project>{83F617A3-01C4-4920-9CC6-E3647D7BB2D0}</Project>
       <Name>NodeModelTestApp.Core</Name>
@@ -227,10 +235,6 @@
     <ProjectReference Include="..\NodeModel\NodeModel.csproj">
       <Project>{5D9ED209-4D2E-4E88-94E1-EE7FF9B089AC}</Project>
       <Name>NodeModel</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NodeRepository\NodeRepository.csproj">
-      <Project>{6C490E07-9038-4F66-9FDE-D8DDA46ABC6C}</Project>
-      <Name>NodeRepository</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

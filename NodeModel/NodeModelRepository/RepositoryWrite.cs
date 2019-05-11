@@ -8,7 +8,7 @@ using NodeModel;
 
 using Windows.Storage.Streams;
 
-namespace NodeRepository
+namespace NodeModelRepository
 {
     public partial class Repository
     {
@@ -80,18 +80,16 @@ namespace NodeRepository
 
                 var b = BZ;
                 if (!string.IsNullOrWhiteSpace(tx.Name)) b |= B1;
-                if (!string.IsNullOrWhiteSpace(tx.Summary)) b |= B2;
+                if (!string.IsNullOrWhiteSpace(tx.ToolTip)) b |= B2;
                 if (!string.IsNullOrWhiteSpace(tx.Description)) b |= B3;
 
                 w.WriteByte(b);
                 if ((b & B1) != 0) WriteString(w, tx.Name);
-                if ((b & B2) != 0) WriteString(w, tx.Summary);
+                if ((b & B2) != 0) WriteString(w, tx.ToolTip);
                 if ((b & B3) != 0) WriteString(w, tx.Description);
 
                 w.WriteSingle(tx.Center.X);
                 w.WriteSingle(tx.Center.Y);
-                w.WriteByte(tx.Radius.X);
-                w.WriteByte(tx.Radius.Y);
 
                 if (tx.Count > 0)
                 {
@@ -99,6 +97,15 @@ namespace NodeRepository
                     foreach (var rx in tx.Items)
                     {
                         w.WriteInt32(itemIndex[rx]);
+
+                        var d = BZ;
+
+                        if (!string.IsNullOrWhiteSpace(rx.Name)) d |= B1;
+                        if (!string.IsNullOrWhiteSpace(rx.ToolTip)) d |= B2;
+
+                        w.WriteByte(d);
+                        if ((d & B1) != 0) WriteString(w, rx.Name);
+                        if ((d & B2) != 0) WriteString(w, rx.ToolTip);
 
                         //in this application each row is a graph node
                         w.WriteSingle(rx.Center.X);

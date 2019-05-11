@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Numerics;
+using Windows.UI.Xaml;
 
 namespace NodeModel
 {
@@ -45,32 +46,7 @@ namespace NodeModel
         /// </summary>
         bool Reload();
 
-        /// <summary>
-        /// Create a new INodeType instance
-        /// </summary>
-        /// <returns></returns>
-        INodeType CreateNodeType();
-
-        /// <summary>
-        /// Delete the given INodeType 
-        /// </summary>
-        /// <returns></returns>
-        bool DeleteNodeType(INodeType nodeType);
-
-
-        /// <summary>
-        /// Current list of all instantiated INodes (can be used to draw all nodes)
-        /// </summary>
-        ObservableCollection<INode> AllNodes { get; }
-
-        /// <summary>
-        /// Current list of all instantiated IEdges (can be used to draw all edges)
-        /// </summary>
-        ObservableCollection<IEdge> AllEdges { get; }
-
-        /// <summary>
-        /// Current list of all instantiated INodeTypes
-        /// </summary>
-        ObservableCollection<INodeType> AllNodeTypes { get; }
+        ISelector GetMetadataSelector();
+        ISelector GetModelingSelector();
     }
 }

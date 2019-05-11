@@ -5,7 +5,7 @@ using NodeModel;
 
 using Windows.Storage.Streams;
 
-namespace NodeRepository
+namespace NodeModelRepository
 {
     public partial class Repository
     {

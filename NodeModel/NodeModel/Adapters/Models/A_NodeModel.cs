@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text;
+using Windows.UI.Xaml;
 
 namespace NodeModel
 {
@@ -24,13 +25,11 @@ namespace NodeModel
         public string ModelName
         {
             get { return ItemRef is null ? "<none>" : ChefRef.GetRepositoryName(); }
-            set { Set(ref _modelName, value); }
         }
         private string _modelName;
         public string ModelFullName
         {
             get { return ItemRef is null ? "Try New or Open" : ChefRef.GetFullRepositoryName(); }
-            set { Set(ref _modelFullName, value); }
         }
         private string _modelFullName;
         #endregion
@@ -38,27 +37,8 @@ namespace NodeModel
         #region Refresh  ======================================================
         public void Refresh()
         {
-            _modelName = string.Empty;
-            _modelFullName = string.Empty;
-
-            ModelName = "refresh";
-            ModelFullName = "refresh";
-        }
-        #endregion
-
-        #region CreateNodeType  ===============================================
-        public INodeType CreateNodeType()
-        {
-            var nodeType = new A_NodeType(ChefRef.CreateTableX());
-            AddNodeType(nodeType);
-            return nodeType;
-        }
-        #endregion
-
-        #region DeleteNodeType  ===============================================
-        public bool DeleteNodeType(INodeType nodeType)
-        {
-            throw new NotImplementedException();
+            PropertyChange(nameof(ModelName));
+            PropertyChange(nameof(ModelFullName));
         }
         #endregion
 
@@ -66,6 +46,7 @@ namespace NodeModel
         public bool Load(IRepository repository)
         {
             ItemRef = new Chef(repository);
+
             Refresh();
             return true;
         }
@@ -99,44 +80,7 @@ namespace NodeModel
         }
         #endregion
 
-        #region AllNodes  =====================================================
-        private ObservableCollection<INode> _allNodes = new ObservableCollection<INode>();
-        private void AddNode(INode node)
-        {
-            _allNodes.Add(node);
-        }
-        private void RemoveNode(INode node)
-        {
-            _allNodes.Remove(node);
-        }
-        public ObservableCollection<INode> AllNodes => _allNodes;
-        #endregion
-
-        #region AllEdges  =====================================================
-        private ObservableCollection<IEdge> _allEdges = new ObservableCollection<IEdge>();
-        private void AddEdge(IEdge edge)
-        {
-            _allEdges.Add(edge);
-        }
-        private void RemoveEdge(IEdge edge)
-        {
-            _allEdges.Remove(edge);
-        }
-        public ObservableCollection<IEdge> AllEdges => _allEdges;
-        #endregion
-
-        #region AllNodeTypes  =================================================
-        private ObservableCollection<INodeType> _allNodeTypes = new ObservableCollection<INodeType>();
-        private void AddNodeType(INodeType nodeType)
-        {
-            _allNodeTypes.Add(nodeType);
-        }
-        private void RemoveNodeType(INodeType nodeType)
-        {
-            _allNodeTypes.Remove(nodeType);
-        }
-
-        public ObservableCollection<INodeType> AllNodeTypes => _allNodeTypes;
-        #endregion
+        public ISelector GetMetadataSelector() => new A_Selector(this, ItemRef, true);
+        public ISelector GetModelingSelector() => new A_Selector(this, ItemRef, false);
     }
 }

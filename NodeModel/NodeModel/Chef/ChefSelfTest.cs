@@ -56,20 +56,20 @@ namespace NodeModel
             var ds = 5 * ns;
             for (int i = 0, x0 = ns; i < NR; i++, x0 += ds)
             {
-                TableXStore.Items[0].Items[i].CenterPoint = new System.Numerics.Vector2(x0, 4 * ns );
+                TableXStore.Items[0].Items[i].Center = (x0, 4 * ns );
 
-                TableXStore.Items[1].Items[i].CenterPoint = new System.Numerics.Vector2(x0 + 1 * ns, 4 * ns);
+                TableXStore.Items[1].Items[i].Center = (x0 + 1 * ns, 4 * ns);
 
-                TableXStore.Items[2].Items[i].CenterPoint = new System.Numerics.Vector2(x0 + 2 * ns, 2 * ns);
-                TableXStore.Items[3].Items[i].CenterPoint = new System.Numerics.Vector2(x0 + 2 * ns, 6 * ns);
+                TableXStore.Items[2].Items[i].Center = (x0 + 2 * ns, 2 * ns);
+                TableXStore.Items[3].Items[i].Center = (x0 + 2 * ns, 6 * ns);
 
-                TableXStore.Items[4].Items[i].CenterPoint = new System.Numerics.Vector2(x0 + 3 * ns, 1 * ns);
-                TableXStore.Items[5].Items[i].CenterPoint = new System.Numerics.Vector2(x0 + 3 * ns, 2 * ns);
-                TableXStore.Items[6].Items[i].CenterPoint = new System.Numerics.Vector2(x0 + 3 * ns, 3 * ns);
+                TableXStore.Items[4].Items[i].Center = (x0 + 3 * ns, 1 * ns);
+                TableXStore.Items[5].Items[i].Center = (x0 + 3 * ns, 2 * ns);
+                TableXStore.Items[6].Items[i].Center = (x0 + 3 * ns, 3 * ns);
 
-                TableXStore.Items[7].Items[i].CenterPoint = new System.Numerics.Vector2(x0 + 3 * ns, 5 * ns);
-                TableXStore.Items[8].Items[i].CenterPoint = new System.Numerics.Vector2(x0 + 3 * ns, 6 * ns);
-                TableXStore.Items[9].Items[i].CenterPoint = new System.Numerics.Vector2(x0 + 3 * ns, 7 * ns);
+                TableXStore.Items[7].Items[i].Center = (x0 + 3 * ns, 5 * ns);
+                TableXStore.Items[8].Items[i].Center = (x0 + 3 * ns, 6 * ns);
+                TableXStore.Items[9].Items[i].Center = (x0 + 3 * ns, 7 * ns);
             }
         }
         #endregion
