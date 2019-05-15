@@ -57,7 +57,7 @@ namespace NodeModelCanvas
 
             foreach ((Rect rect, byte w, (byte A, byte R, byte G, byte B) c) in data.DrawRects)
             {
-                ds.DrawRoundedRectangle(rect, 5, 5, Color.FromArgb(c.A, c.R, c.G, c.B), w);
+                ds.FillRoundedRectangle(rect, 5, 5, Color.FromArgb(c.A, c.R, c.G, c.B));
             }
 
             foreach ((Vector2[] points, bool isDotted, byte w, (byte A, byte R, byte G, byte B) c) in data.DrawSplines)
@@ -86,53 +86,84 @@ namespace NodeModelCanvas
         }
         #endregion
 
-        #region EditorCanavas_Loaded  =========================================
+        #region Canavas_Loaded  ===============================================
         private void EditorCanvas_Loaded(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
+            EditorCanvas.Loaded -= EditorCanvas_Loaded;
             EditorCanvas.Invalidate();
+            if (_isRootCanvasLoaded) SetViewIdle();
         }
+        bool _isEditorCanvasLoaded;
 
+        private void RootCanvas_Loaded(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            _isRootCanvasLoaded = true;
+            RootCanvas.Loaded -= RootCanvas_Loaded;
+            SetViewIdle();
+            if (_isEditorCanvasLoaded) EditorCanvas.Invalidate();
+        }
+        bool _isRootCanvasLoaded;
         #endregion
 
-        #region EditorCanvas_PointerMoved  ====================================
-        private void EditorCanvas_PointerMoved(object sender, Windows.UI.Xaml.Input.PointerRoutedEventArgs e)
+        #region RootCanvas_PointerMoved  ======================================
+        private void RootCanvas_PointerMoved(object sender, Windows.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
-            SetDrawPoint2(e);
-            e.Handled = true;
+            if (_isRootCanvasLoaded)
+            {
+                SetGridPoint2(e);
+                SetDrawPoint2(e);
 
-            if (_pointerIsPressed)
-                Post(EventType.Moving);
-            else
-                Post(EventType.Hover);
+                e.Handled = true;
+
+                if (_pointerIsPressed)
+                    Post(EventType.Drag);
+                else
+                    Post(EventType.Skim);
+            }
         }
         private bool _pointerIsPressed;
         #endregion
 
-        #region EditorCanvas_PointerPressed  ==================================
-        private void EditorCanvas_PointerPressed(object sender, Windows.UI.Xaml.Input.PointerRoutedEventArgs e)
+        #region RootCanvas_PointerPressed  ====================================
+        private void RootCanvas_PointerPressed(object sender, Windows.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
-            _pointerIsPressed = true;
-            SetDrawPoint1(e);
-            e.Handled = true;
+            if (_isRootCanvasLoaded)
+            {
+                _pointerIsPressed = true;
+                SetGridPoint1(e);
+                SetDrawPoint1(e);
+                e.Handled = true;
 
-            Post(EventType.Begin);
+                Post(EventType.Tap);
+            }
         }
         #endregion
 
-        #region EditorCanvas_PointerReleased  =================================
-        private void EditorCanvas_PointerReleased(object sender, Windows.UI.Xaml.Input.PointerRoutedEventArgs e)
+        #region RootCanvas_PointerReleased  ===================================
+        private void RootCanvas_PointerReleased(object sender, Windows.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
-            _pointerIsPressed = false;
-            SetDrawPoint2(e);
-            e.Handled = true;
+            if (_isRootCanvasLoaded)
+            {
+                _pointerIsPressed = false;
+                SetGridPoint2(e);
+                SetDrawPoint2(e);
+                e.Handled = true;
 
-            Post(EventType.Begin);
+                Post(EventType.End);
+            }
         }
         #endregion
 
         #region HelperMethods  ================================================
+        private void SetGridPoint1(PointerRoutedEventArgs e) => _selector.GridPoint1 = GridPoint(e);
+        private void SetGridPoint2(PointerRoutedEventArgs e) => _selector.GridPoint2 = GridPoint(e);
         private void SetDrawPoint1(PointerRoutedEventArgs e) => _selector.DrawPoint1 = DrawPoint(e);
         private void SetDrawPoint2(PointerRoutedEventArgs e) => _selector.DrawPoint2 = DrawPoint(e);
+        private Vector2 GridPoint(PointerRoutedEventArgs e)
+        {
+            var p = e.GetCurrentPoint(RootGrid).Position;
+            return new Vector2((float)p.X, (float)p.Y);
+        }
         private Vector2 DrawPoint(PointerRoutedEventArgs e)
         {
             var p = e.GetCurrentPoint(EditorCanvas).Position;
@@ -144,10 +175,40 @@ namespace NodeModelCanvas
 
 
         #region Event/Mode/State/Action  ======================================
-        enum EventType { Idle, Begin, End, Hover, Moving };
-        enum StateType { None, OnVoid, OnPin, OnNode, OnRegion, BeginNodeMove, MoveNode, EndNodeMove, BeginRegionMove, MoveRegion, EndRegionMove, BeginLink, TraceLink, EndLink };
+        enum EventType { Idle, Tap, End, Skim, Drag };
+        private enum StateType
+        {   Unknown,
 
-        StateType _state = StateType.None;
+            ViewIdle,
+            ViewOnVoidTap, ViewOnVoidDrag,   //trace a new region
+
+            ViewOnPinSkim, ViewOnNodeSkim, ViewOnRegionSkim,  //show tooltips
+            ViewOnPinTap, ViewOnNodeTap, ViewOnRegionTap,     //show property sheet
+
+            SizeIdle,
+            SizeOnTopSkim, SizeOnLeftSkim, SizeOnRightSkim, SizeOnBottomSkim,
+            SizeOnTopTap, SizeOnLeftTap, SizeOnRightTap, SizeOnBottomTap,
+            SizeOnTopDrag, SizeOnLeftDrag, SizeOnRightDrag, SizeOnBottomDrag,
+
+            MoveIdle,
+            MoveOnNodeSkim, MoveOnRegionSkim,
+            MovenNodeTap, MoveOnRegionTap,
+            MovenNodeDrag, MoveOnRegionDrag,
+
+            CopyIdle,
+            CopyOnNodeSkim, CopyOnRegionSkim,
+            CopyOnNodeTap, CopyOnRegionTap,
+            CopyOnNodeDrag, CopyOnRegionDrag,
+
+            LinkIdle,
+            LinkOnPinSkim, LinkOnNodeSkim,
+            LinkOnPinTap, LinkOnNodeTap,
+            LinkOnPinDrag, LinkOnNodeDrag,
+
+            CreateIdle, CreateTap, CreateOnNode,
+        };
+
+        StateType _state = StateType.Unknown;
         Dictionary<EventType, Action> Event_Action = new Dictionary<EventType, Action>();
 
         void Post(EventType evt) { if (Event_Action.TryGetValue(evt, out Action action)) action(); }
@@ -155,6 +216,7 @@ namespace NodeModelCanvas
         bool SetState(StateType state)
         {
             if (_state == state) return false;
+            _state = state;
             Debug.WriteLine($"State: {_state}");
 
             Event_Action.Clear();
@@ -164,51 +226,118 @@ namespace NodeModelCanvas
         {
             Event_Action[evt] = act;
         }
+
+
         #endregion
 
 
-        #region Mode_View  ====================================================
+        #region View_Mode  ====================================================
+
+        #region SetViewIdel  ==================================================
         void SetViewIdle()
         {
-            if (SetState(StateType.OnVoid))
+            if (_isRootCanvasLoaded)
             {
-                SetEventAction(EventType.Hover, ViewHitTest);
+                if (SetState(StateType.ViewIdle))
+                {
+                    HideRegionGrid();
+                    SetEventAction(EventType.Tap, ViewIdle_TapHitTest);
+                    SetEventAction(EventType.Skim, ViewIdle_SkimHitTest);
+                }
             }
         }
-        async void ViewHitTest()
+        async void ViewIdle_SkimHitTest()
+        {
+            var anyHit = false;
+            await _dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { anyHit = _selector.HitTest(); });
+            if (anyHit && _selector.IsHitNode)
+                ShowTooltip();
+            else
+                HideTootlip();
+        }
+        async void ViewIdle_TapHitTest()
         {
             var anyHit = false;
             await _dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { anyHit = _selector.HitTest(); });
             if (anyHit)
-                Debug.WriteLine("got hit ..");
+            {
+                if (_selector.IsHitNode)
+                    _selector.ShowPropertyPanel();
+            }
             else
-                Debug.WriteLine("no hit ..");
+            {
+                HideSelectorGrid();
+                HideTootlip();
+                SetViewOnVoidTap();
+                _selector.HidePropertyPanel();
+            }
         }
+
+        void SetViewOnVoidTap()
+        {
+            if (SetState(StateType.ViewOnVoidTap))
+            {
+                SetEventAction(EventType.End, SetViewIdle);
+                SetEventAction(EventType.Drag, SetViewOnVoidDrag);
+            }
+        }
+        void SetViewOnVoidDrag()
+        {
+            if (SetState(StateType.ViewOnVoidDrag))
+            {
+                ShowRegionGrid();
+                SetEventAction(EventType.End, RegionTraceEnd);
+                SetEventAction(EventType.Drag, TracingRegion);
+            }
+        }
+        void RegionTraceEnd()
+        {
+            ShowSelectorGrid();
+            SetViewIdle();
+        }
+        void TracingRegion()
+        {
+            UpdateRegionGrid();
+        }
+
+        #endregion
+
+        #region SetViewOnNodeSkim  ============================================
+        void SetView_OnNode_Skim()
+        {
+            if (SetState(StateType.ViewOnNodeSkim))
+            {
+                SetEventAction(EventType.Skim, View_OnNode_SkimHitTest);
+            }
+        }
+        async void View_OnNode_SkimHitTest()
+        {
+            var anyHit = false;
+            await _dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { anyHit = _selector.HitVerify(); });
+            if (anyHit && _selector.IsHitNode)
+            {
+
+            }
+        }
+        #endregion
+
         #endregion
 
         #region Mode_Move  ====================================================
         void SetMoveIdle()
         {
-            if (SetState(StateType.OnVoid))
+            if (SetState(StateType.MoveIdle))
             {
-                SetEventAction(EventType.Hover, MoveHitTest);
             }
-        }
-        void MoveHitTest()
-        {
         }
         #endregion
 
         #region Mode_Create  ==================================================
         void SetCreateIdle()
         {
-            if (SetState(StateType.OnVoid))
+            if (SetState(StateType.CreateTap))
             {
-                SetEventAction(EventType.Hover, CreateHitTest);
             }
-        }
-        void CreateHitTest()
-        {
         }
         #endregion
 
@@ -220,21 +349,26 @@ namespace NodeModelCanvas
         #region RadioButton_Events  ===========================================
         private void ViewSelect_Checked(object sender, Windows.UI.Xaml.RoutedEventArgs e) => SetViewIdle();
         private void MoveSelect_Checked(object sender, Windows.UI.Xaml.RoutedEventArgs e) => SetMoveIdle();
-        private void LinkSelect_Checked(object sender, Windows.UI.Xaml.RoutedEventArgs e) => SetCreateIdle();
+        private void LinkSelect_Checked(object sender, Windows.UI.Xaml.RoutedEventArgs e) { }
         private void CopySelect_Checked(object sender, Windows.UI.Xaml.RoutedEventArgs e) { }
-        private void CreateSelect_Checked(object sender, Windows.UI.Xaml.RoutedEventArgs e) { }
+        private void CreateSelect_Checked(object sender, Windows.UI.Xaml.RoutedEventArgs e) => SetCreateIdle();
         private void OperateSelect_Checked(object sender, Windows.UI.Xaml.RoutedEventArgs e) { }
         #endregion
 
         #region ModelEditCanvas_Unloaded  =====================================
         private void ModelCanvas_Unloaded(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
+            this.Unloaded -= ModelCanvas_Unloaded;
+
             if (EditorCanvas != null)
             {
                 EditorCanvas.RemoveFromVisualTree();
                 EditorCanvas = null;
             }
         }
+        #endregion
+
+        #region SelectorGrid  =================================================
         #endregion
     }
 }

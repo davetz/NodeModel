@@ -123,6 +123,10 @@
     <Compile Include="ModelCanvas.xaml.cs">
       <DependentUpon>ModelCanvas.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ModelCanvasRegionGrid.cs" />
+    <Compile Include="ModelCanvasSelectorGrid.cs" />
+    <Compile Include="ModelCanvasToolTipGrid.cs" />
+    <Compile Include="ModelCanvasResizerGrid.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\NodeModelCanvas.rd.xml" />
   </ItemGroup>

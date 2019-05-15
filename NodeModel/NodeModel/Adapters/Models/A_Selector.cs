@@ -11,22 +11,39 @@ using Windows.UI.Xaml;
 
 namespace NodeModel
 {
-    public class A_Selector : A_Model, ISelector
+    public abstract class A_Selector : A_Model, ISelector
     {
         internal A_NodeModel Model => _model;
         private readonly A_NodeModel _model;
-        internal bool IsMetadata => _isMetadata;
         private readonly bool _isMetadata; // its one or the other metadata or modeling data
 
-        internal A_Selector(A_NodeModel model, Item itemRef, bool isMetadata) : base(itemRef)
+        internal A_Selector(A_NodeModel model, Item itemRef) : base(itemRef)
         {
             _model = model;
-            _isMetadata = isMetadata;
         }
+
+        abstract public bool CreateNode();
+
+        abstract public bool HitTest();
+        abstract public bool HitVerify();
+
+        abstract public void ShowPropertyPanel();
+        abstract public void HidePropertyPanel();
+
 
         #region HitTest  ======================================================
         internal HitType Hit;
-        
+
+        internal RowX HitRowX;
+        internal TableX HitTableX;
+        internal RelationX HitRelationX;
+        internal bool HitEdgeFarEnd;
+
+        public string ToolTip_Text1 { get; set; }
+        public string ToolTip_Text2 { get; set; }
+
+        public Vector2 GridPoint1 { get; set; }
+        public Vector2 GridPoint2 { get; set; }
         public Vector2 DrawPoint1 { get; set; }
         public Vector2 DrawPoint2 { get; set; }
         public Rect RegionRect { get; private set; }
@@ -36,18 +53,7 @@ namespace NodeModel
         public bool IsHitPin => (Hit & HitType.Pin) != 0;
         public bool IsHitNode => (Hit & HitType.Node) != 0;
         public bool IsHitRegion => (Hit & HitType.Region) != 0;
-
-        public bool HitTest()
-        {
-            if (ItemRef is null) return false;
-
-            if (_isMetadata)
-                return ChefRef.MetadataHitTest(this);
-            else
-                return ChefRef.MetadataHitTest(this);
-        }
         #endregion
-
 
         #region NodePanel  ====================================================
         internal void SetRowX(RowX rowX)
@@ -55,14 +61,14 @@ namespace NodeModel
             _rowX = rowX;
             NodePanel_Visible = (rowX is null) ? Visibility.Collapsed : Visibility.Visible;
         }
-        private RowX _rowX;
+        protected RowX _rowX;
 
         public Visibility NodePanel_Visible
         {
             get => _nodePanelVisible;
             set { Set(ref _nodePanelVisible, value); }
         }
-        private Visibility _nodePanelVisible = Visibility.Collapsed;
+        protected Visibility _nodePanelVisible = Visibility.Collapsed;
 
 
         public string Node_Name
@@ -85,16 +91,23 @@ namespace NodeModel
         internal void SetTableX(TableX tableX)
         {
             _tableX = tableX;
-            NodeTypePanel_Visible = (tableX is null) ? Visibility.Collapsed : Visibility.Visible;
+            _nodeTypePanel_Visible = (tableX is null) ? Visibility.Collapsed : Visibility.Visible;
+            PropertyChange(nameof(NodeTypePanel_Visible));
+            PropertyChange(nameof(NodeType_Name));
+            PropertyChange(nameof(NodeType_ToolTip));
+            PropertyChange(nameof(NodeType_Description));
+            PropertyChange(nameof(NodeType_MinWidth));
+            PropertyChange(nameof(NodeType_MinHeight));
         }
+
         private TableX _tableX;
 
         public Visibility NodeTypePanel_Visible
         {
-            get => _nodeTypePanelVisible;
-            set { Set(ref _nodeTypePanelVisible, value); }
+            get => _nodeTypePanel_Visible;
+            set { Set(ref _nodeTypePanel_Visible, value); }
         }
-        private Visibility _nodeTypePanelVisible = Visibility.Collapsed;
+        private Visibility _nodeTypePanel_Visible = Visibility.Collapsed;
 
 
         public string NodeType_Name
@@ -112,18 +125,31 @@ namespace NodeModel
             get => _tableX?.Description ?? "<null>";
             set { if (_tableX != null) Set(ref _tableX.Description, value); }
         }
+
+        public int NodeType_MinWidth
+        {
+            get => (_tableX is null) ? 0 : _tableX.MinWidth;
+            set { if (_tableX != null) { var val = _tableX.MinWidth; _tableX.MinWidth = value; Set(ref val, value); } }
+        }
+
+        public int NodeType_MinHeight
+        {
+            get => (_tableX is null) ? 0 : _tableX.MinHeight;
+            set { if (_tableX != null) { var val = _tableX.MinHeight; _tableX.MinHeight = value; Set(ref val, value); } }
+        }
+
         #endregion
 
 
-        #region CanvasData  ===================================================
+        #region CanvasDraw  ===================================================
         public IList<(Rect Rect, byte Width, (byte A, byte R, byte G, byte B) Color)> DrawRects => _drawRects;
-        private IList<(Rect Rect, byte Width, (byte A, byte R, byte G, byte B) Color)> _drawRects = new List<(Rect Rect, byte Width, (byte A, byte R, byte G, byte B) Color)>();
+        protected IList<(Rect Rect, byte Width, (byte A, byte R, byte G, byte B) Color)> _drawRects = new List<(Rect Rect, byte Width, (byte A, byte R, byte G, byte B) Color)>();
 
         public IList<(Vector2[] Points, bool IsDotted, byte Width, (byte A, byte R, byte G, byte B) Color)> DrawSplines => _drawSplines;
-        private IList<(Vector2[] Points, bool IsDotted, byte Width, (byte A, byte R, byte G, byte B) Color)> _drawSplines = new List<(Vector2[] Points, bool IsDotted, byte Width, (byte A, byte R, byte G, byte B) Color)>();
+        protected IList<(Vector2[] Points, bool IsDotted, byte Width, (byte A, byte R, byte G, byte B) Color)> _drawSplines = new List<(Vector2[] Points, bool IsDotted, byte Width, (byte A, byte R, byte G, byte B) Color)>();
 
         public IList<(Vector2 TopLeft, string Text, (byte A, byte R, byte G, byte B) Color)> DrawText => _drawText;
-        private IList<(Vector2 TopLeft, string Text, (byte A, byte R, byte G, byte B) Color)> _drawText = new List<(Vector2 TopLeft, string Text, (byte A, byte R, byte G, byte B) Color)>();
+        protected IList<(Vector2 TopLeft, string Text, (byte A, byte R, byte G, byte B) Color)> _drawText = new List<(Vector2 TopLeft, string Text, (byte A, byte R, byte G, byte B) Color)>();
         #endregion
     }
 }

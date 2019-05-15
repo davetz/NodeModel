@@ -80,7 +80,7 @@ namespace NodeModel
         }
         #endregion
 
-        public ISelector GetMetadataSelector() => new A_Selector(this, ItemRef, true);
-        public ISelector GetModelingSelector() => new A_Selector(this, ItemRef, false);
+        public ISelector GetMetadataSelector() => new A_MetadataSelector(this, ItemRef);
+        public ISelector GetModelingSelector() => new A_MetadataSelector(this, ItemRef);
     }
 }

@@ -141,6 +141,10 @@ namespace NodeModelRepository
                 if ((b & B3) != 0) tx.Description = ReadString(r);
 
                 tx.Center = (r.ReadSingle(), r.ReadSingle());
+                var (w, h) = (r.ReadByte(), r.ReadByte());
+                if (w < 8) w = 8;
+                if (h < 8) h = 8;
+                tx.Radius = (w,h);
 
                 var rxCount = r.ReadInt32();
                 if (rxCount < 0) throw new Exception($"Invalid row count {count}");

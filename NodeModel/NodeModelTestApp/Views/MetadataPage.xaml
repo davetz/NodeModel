@@ -40,6 +40,17 @@
             <Setter Property="Margin" Value="10,0,0,0" />
             <Setter Property="FontSize" Value="12" />
         </Style>
+        
+        <Style x:Key="MinWidthTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Padding" Value="4,4,0,0" />
+            <Setter Property="Margin" Value="10,0,0,0" />
+            <Setter Property="FontSize" Value="14" />
+        </Style>
+        <Style x:Key="MinHeightTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Padding" Value="4,4,0,0" />
+            <Setter Property="Margin" Value="10,0,0,0" />
+            <Setter Property="FontSize" Value="14" />
+        </Style>
 
         <Style x:Key="ActionButtonStyle" TargetType="Button">
             <Setter Property="HorizontalAlignment" Value="Center" />
@@ -57,7 +68,7 @@
                 </Grid.ColumnDefinitions>
                 <Grid>
                     <StackPanel Style="{StaticResource PropertyPanelStyle}">
-                        <TextBlock Text="Selected Item(s)" TextAlignment="Center" Margin="0,6,0,0"/>
+                        <TextBlock Text="Property Sheet of Selected Item" TextAlignment="Center" Margin="0,6,0,0"/>
                         <StackPanel x:Name="NodeTypePanel" Style="{StaticResource PropertyPanelStyle}" Visibility="{Binding Path=NodeTypePanel_Visible, Mode=OneWay}">
                             <TextBlock Text="Node Type" Style="{StaticResource TitleStyle}"/>
                             <TextBlock Text="Name:" Style="{StaticResource LabelStyle}"/>
@@ -68,6 +79,11 @@
 
                             <TextBlock Text="Description:" Style="{StaticResource LabelStyle}"/>
                             <TextBox Style="{StaticResource DescriptionTextBoxStyle}" Text="{Binding Path=NodeType_Description, Mode=TwoWay}"/>
+                            <TextBlock Text="MinWidth:      MinHeight:" Style="{StaticResource LabelStyle}"/>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBox Style="{StaticResource MinWidthTextBoxStyle}" Text="{Binding Path=NodeType_MinWidth, Mode=TwoWay}"/>
+                                <TextBox Style="{StaticResource MinHeightTextBoxStyle}" Text="{Binding Path=NodeType_MinHeight, Mode=TwoWay}"/>
+                            </StackPanel>
                         </StackPanel>
                         <StackPanel x:Name="PropertyTypePanel" Style="{StaticResource PropertyPanelStyle}">
                         </StackPanel>

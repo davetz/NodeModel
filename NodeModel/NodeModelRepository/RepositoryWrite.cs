@@ -90,6 +90,8 @@ namespace NodeModelRepository
 
                 w.WriteSingle(tx.Center.X);
                 w.WriteSingle(tx.Center.Y);
+                w.WriteByte(tx.Radius.X);
+                w.WriteByte(tx.Radius.Y);
 
                 if (tx.Count > 0)
                 {

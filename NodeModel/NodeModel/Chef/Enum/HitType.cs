@@ -11,7 +11,5 @@ namespace NodeModel
         Pin = 0x01,
         Node = 0x02,
         Region = 0x04,
-        PinType = 0x08,
-        NodeType = 0x10,
     }
 }
