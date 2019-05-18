@@ -15,23 +15,26 @@ namespace NodeModelCanvas
 {
     public sealed partial class ModelCanvas : UserControl
     {
+        private INodeModel _model;
+        private ISelector _selector;
+        private CoreDispatcher _dispatcher = CoreWindow.GetForCurrentThread().Dispatcher;
+
+        private float _zoomFactor = 1; //scale the view extent so that it fits on the canvas
+        private Vector2 _offset = new Vector2(); //offset need to center the view extent on the canvas
+
+        #region Constructor/Initialize  =======================================
         public ModelCanvas()
         {
             this.InitializeComponent();
         }
-        private CoreDispatcher _dispatcher = CoreWindow.GetForCurrentThread().Dispatcher;
-
-        private INodeModel _model;
-        private ISelector _selector;
-
-        private float _zoomFactor = 1; //scale the view extent so that it fits on the canvas
-        private Vector2 _offset = new Vector2(); //complete offset need to exactly center the view extent on the canvas
 
         public void Initialize(INodeModel model, ISelector selector)
         {
             DataContext = _model = model;
             _selector = selector;
         }
+        #endregion
+
 
         #region StrokeStyle  ==================================================
         private CanvasStrokeStyle StrokeStyle(bool isDotted)
@@ -58,6 +61,27 @@ namespace NodeModelCanvas
             foreach ((Rect rect, byte w, (byte A, byte R, byte G, byte B) c) in data.DrawRects)
             {
                 ds.FillRoundedRectangle(rect, 5, 5, Color.FromArgb(c.A, c.R, c.G, c.B));
+            }
+
+            foreach ((Vector2[] points, bool isDotted, byte w, (byte A, byte R, byte G, byte B) c) in data.DrawLines)
+            {
+                using (var pb = new CanvasPathBuilder(ds))
+                {
+                    pb.BeginFigure(points[0]);
+                    for (int i = 1; i < points.Length; i++)
+                    {
+                        pb.AddLine(points[i]);
+                    }
+                    pb.EndFigure(CanvasFigureLoop.Open);
+
+                    using (var geo = CanvasGeometry.CreatePath(pb))
+                    {
+                        //if (FillStroke == Fill_Stroke.Filled)
+                        //    ds.FillGeometry(geo, Color.FromArgb(c.A, c.R, c.G, c.B));
+                        //else
+                        ds.DrawGeometry(geo, Color.FromArgb(c.A, c.R, c.G, c.B), w, StrokeStyle(isDotted));
+                    }
+                }
             }
 
             foreach ((Vector2[] points, bool isDotted, byte w, (byte A, byte R, byte G, byte B) c) in data.DrawSplines)
@@ -104,6 +128,7 @@ namespace NodeModelCanvas
         }
         bool _isRootCanvasLoaded;
         #endregion
+
 
         #region RootCanvas_PointerMoved  ======================================
         private void RootCanvas_PointerMoved(object sender, Windows.UI.Xaml.Input.PointerRoutedEventArgs e)
@@ -171,11 +196,30 @@ namespace NodeModelCanvas
             var y = (p.Y - _offset.Y) / _zoomFactor;
             return new Vector2((float)x, (float)y);
         }
+        private (float top, float  left, float width, float height) GetResizerParams()
+        {
+            var x1 = _selector.NodePoint1.X;
+            var y1 = _selector.NodePoint1.Y;
+            var x2 = _selector.NodePoint2.X;
+            var y2 = _selector.NodePoint2.Y;
+
+
+            var dx = x2 - x1;
+            var dy = y2 - y1;
+
+            var width = dx * _zoomFactor;
+            var height = dy * _zoomFactor;
+
+            var top = y1 * _zoomFactor + _offset.X;
+            var left = x1 * _zoomFactor + _offset.Y;
+
+            return (top, left, width, height);
+        }
         #endregion
 
 
         #region Event/Mode/State/Action  ======================================
-        enum EventType { Idle, Tap, End, Skim, Drag };
+        enum EventType { Idle, Tap, End, Skim, Drag, TopHit, LeftHit, RightHit, BottomHit, TopLeftHit, TopRightHit, BottomLeftHit, BottomRightHit };
         private enum StateType
         {   Unknown,
 
@@ -185,10 +229,8 @@ namespace NodeModelCanvas
             ViewOnPinSkim, ViewOnNodeSkim, ViewOnRegionSkim,  //show tooltips
             ViewOnPinTap, ViewOnNodeTap, ViewOnRegionTap,     //show property sheet
 
-            SizeIdle,
-            SizeOnTopSkim, SizeOnLeftSkim, SizeOnRightSkim, SizeOnBottomSkim,
-            SizeOnTopTap, SizeOnLeftTap, SizeOnRightTap, SizeOnBottomTap,
-            SizeOnTopDrag, SizeOnLeftDrag, SizeOnRightDrag, SizeOnBottomDrag,
+            ResizeTop, ResizeLeft, ResizeRight, ResizeBottom,
+            ResizeTopLeft, ResizeTopRight, ResizeBottomLeft, ResizeBottomRight,
 
             MoveIdle,
             MoveOnNodeSkim, MoveOnRegionSkim,
@@ -226,8 +268,6 @@ namespace NodeModelCanvas
         {
             Event_Action[evt] = act;
         }
-
-
         #endregion
 
 
@@ -241,31 +281,49 @@ namespace NodeModelCanvas
                 if (SetState(StateType.ViewIdle))
                 {
                     HideRegionGrid();
+                    RestorePointerCursor();
                     SetEventAction(EventType.Tap, ViewIdle_TapHitTest);
                     SetEventAction(EventType.Skim, ViewIdle_SkimHitTest);
+                    SetEventAction(EventType.TopHit, SetResizeTopHit);
+                    SetEventAction(EventType.LeftHit, SetResizeLeftHit);
+                    SetEventAction(EventType.RightHit, SetResizeRightHit);
+                    SetEventAction(EventType.BottomHit, SetResizeBottomHit);
+                    SetEventAction(EventType.TopLeftHit, SetResizeTopLeftHit);
+                    SetEventAction(EventType.TopRightHit, SetResizeTopRightHit);
+                    SetEventAction(EventType.BottomLeftHit, SetResizeBottomLeftHit);
+                    SetEventAction(EventType.BottomRightHit, SetResizeBottomRightHit);
                 }
             }
         }
         async void ViewIdle_SkimHitTest()
         {
             var anyHit = false;
-            await _dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { anyHit = _selector.HitTest(); });
-            if (anyHit && _selector.IsHitNode)
-                ShowTooltip();
+            await _dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { anyHit = _selector.SkimHitTest(); });
+            if (anyHit)
+            {
+                if (_selector.IsHitNode)
+                    ShowTooltip();
+            }
             else
+            {
                 HideTootlip();
+            }
         }
         async void ViewIdle_TapHitTest()
         {
             var anyHit = false;
-            await _dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { anyHit = _selector.HitTest(); });
+            await _dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { anyHit = _selector.TapHitTest(); });
             if (anyHit)
             {
                 if (_selector.IsHitNode)
+                {
                     _selector.ShowPropertyPanel();
+                    ShowResizerGrid();
+                }
             }
             else
             {
+                HideResizerGrid();
                 HideSelectorGrid();
                 HideTootlip();
                 SetViewOnVoidTap();
@@ -299,7 +357,121 @@ namespace NodeModelCanvas
         {
             UpdateRegionGrid();
         }
+        #endregion
 
+        #region SetResize  ====================================================
+        void SetResizeTopHit()
+        {
+            if (SetState(StateType.ResizeTop))
+            {
+                SetEventAction(EventType.Drag, ResizeTopDrag);
+                SetEventAction(EventType.End, ResizeEnd);
+            }
+        }
+        void SetResizeLeftHit()
+        {
+            if (SetState(StateType.ResizeLeft))
+            {
+                SetEventAction(EventType.Drag, ResizeLeftDrag);
+                SetEventAction(EventType.End, ResizeEnd);
+            }
+        }
+        void SetResizeRightHit()
+        {
+            if (SetState(StateType.ResizeRight))
+            {
+                SetEventAction(EventType.Drag, ResizeRightDrag);
+                SetEventAction(EventType.End, ResizeEnd);
+            }
+        }
+        void SetResizeBottomHit()
+        {
+            if (SetState(StateType.ResizeBottom))
+            {
+                SetEventAction(EventType.Drag, ResizeBottomDrag);
+                SetEventAction(EventType.End, ResizeEnd);
+            }
+        }
+        void SetResizeTopLeftHit()
+        {
+            if (SetState(StateType.ResizeTopLeft))
+            {
+                SetEventAction(EventType.Drag, ResizeTopLeftDrag);
+                SetEventAction(EventType.End, ResizeEnd);
+            }
+        }
+        void SetResizeTopRightHit()
+        {
+            if (SetState(StateType.ResizeTopRight))
+            {
+                SetEventAction(EventType.Drag, ResizeTopRightDrag);
+                SetEventAction(EventType.End, ResizeEnd);
+            }
+        }
+        void SetResizeBottomLeftHit()
+        {
+            if (SetState(StateType.ResizeBottomLeft))
+            {
+                SetEventAction(EventType.Drag, ResizeBottomLeftDrag);
+                SetEventAction(EventType.End, ResizeEnd);
+            }
+        }
+        void SetResizeBottomRightHit()
+        {
+            if (SetState(StateType.ResizeBottomRight))
+            {
+                SetEventAction(EventType.Drag, ResizeBottomRightDrag);
+                SetEventAction(EventType.End, ResizeEnd);
+            }
+        }
+        void ResizeEnd()
+        {
+            _selector.ResizePropagate();
+            _selector.RefreshCanvasDrawData();
+            EditorCanvas.Invalidate();
+            RestorePointerCursor();
+            SetViewIdle();
+        }
+        void ResizeTopDrag()
+        {
+            _selector.ResizeTop();
+            UpdateResizerGrid();
+        }
+        void ResizeLeftDrag()
+        {
+            _selector.ResizeLeft();
+            UpdateResizerGrid();
+        }
+        void ResizeRightDrag()
+        {
+            _selector.ResizeRight();
+            UpdateResizerGrid();
+        }
+        void ResizeBottomDrag()
+        {
+            _selector.ResizeBottom();
+            UpdateResizerGrid();
+        }
+        void ResizeTopLeftDrag()
+        {
+            _selector.ResizeTopLeft();
+            UpdateResizerGrid();
+        }
+        void ResizeTopRightDrag()
+        {
+            _selector.ResizeTopRight();
+            UpdateResizerGrid();
+        }
+        void ResizeBottomLeftDrag()
+        {
+            _selector.ResizeBottomLeft();
+            UpdateResizerGrid();
+        }
+        void ResizeBottomRightDrag()
+        {
+            _selector.ResizeBottomRight();
+            UpdateResizerGrid();
+        }
         #endregion
 
         #region SetViewOnNodeSkim  ============================================
@@ -313,7 +485,7 @@ namespace NodeModelCanvas
         async void View_OnNode_SkimHitTest()
         {
             var anyHit = false;
-            await _dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { anyHit = _selector.HitVerify(); });
+            await _dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { anyHit = _selector.SkimHitTest(); });
             if (anyHit && _selector.IsHitNode)
             {
 
@@ -366,9 +538,6 @@ namespace NodeModelCanvas
                 EditorCanvas = null;
             }
         }
-        #endregion
-
-        #region SelectorGrid  =================================================
         #endregion
     }
 }

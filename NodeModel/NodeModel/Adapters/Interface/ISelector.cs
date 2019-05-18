@@ -12,18 +12,22 @@ namespace NodeModel
     {
         Vector2 GridPoint1 { get; set; }
         Vector2 GridPoint2 { get; set; }
+
         Vector2 DrawPoint1 { get; set; }
         Vector2 DrawPoint2 { get; set; }
 
-        Rect RegionRect { get; }
+        Vector2 NodePoint1 { get; }
+        Vector2 NodePoint2 { get; }
 
         bool IsAnyHit { get; }
         bool IsHitPin { get; }
         bool IsHitNode { get; }
         bool IsHitRegion { get; }
 
-        bool HitTest();
-        bool HitVerify();
+        bool TapHitTest();
+        bool EndHitTest();
+        bool SkimHitTest();
+        bool DragHitTest();
 
         void ShowPropertyPanel();
         void HidePropertyPanel();
@@ -40,12 +44,23 @@ namespace NodeModel
         string NodeType_Name { get; set; }
         string NodeType_ToolTip { get; set; }
         string NodeType_Description { get; set; }
-        int NodeType_MinWidth { get; set; }
-        int NodeType_MinHeight { get; set; }
+
+        void ResizeTop();
+        void ResizeLeft();
+        void ResizeRight();
+        void ResizeBottom();
+        void ResizeTopLeft();
+        void ResizeTopRight();
+        void ResizeBottomLeft();
+        void ResizeBottomRight();
+        void ResizePropagate();
+
+        void RefreshCanvasDrawData();
 
         bool CreateNode();
 
         IList<(Rect Rect, byte Width, (byte A, byte R, byte G, byte B) Color)> DrawRects { get; }
+        IList<(Vector2[] Points, bool IsDotted, byte Width, (byte A, byte R, byte G, byte B) Color)> DrawLines { get; }
         IList<(Vector2[] Points, bool IsDotted, byte Width, (byte A, byte R, byte G, byte B) Color)> DrawSplines { get; }
         IList<(Vector2 TopLeft, string Text, (byte A, byte R, byte G, byte B) Color)> DrawText { get; }
     }

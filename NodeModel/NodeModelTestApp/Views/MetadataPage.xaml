@@ -79,11 +79,6 @@
 
                             <TextBlock Text="Description:" Style="{StaticResource LabelStyle}"/>
                             <TextBox Style="{StaticResource DescriptionTextBoxStyle}" Text="{Binding Path=NodeType_Description, Mode=TwoWay}"/>
-                            <TextBlock Text="MinWidth:      MinHeight:" Style="{StaticResource LabelStyle}"/>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBox Style="{StaticResource MinWidthTextBoxStyle}" Text="{Binding Path=NodeType_MinWidth, Mode=TwoWay}"/>
-                                <TextBox Style="{StaticResource MinHeightTextBoxStyle}" Text="{Binding Path=NodeType_MinHeight, Mode=TwoWay}"/>
-                            </StackPanel>
                         </StackPanel>
                         <StackPanel x:Name="PropertyTypePanel" Style="{StaticResource PropertyPanelStyle}">
                         </StackPanel>

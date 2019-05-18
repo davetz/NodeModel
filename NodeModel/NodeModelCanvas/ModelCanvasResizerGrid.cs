@@ -1,5 +1,7 @@
 ﻿using NodeModel;
+using System;
 using System.Collections.Generic;
+using System.Numerics;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -9,7 +11,6 @@ namespace NodeModelCanvas
 {
     public sealed partial class ModelCanvas
     {
-
         void ShowResizerGrid()
         {
             UpdateResizerGrid();
@@ -20,228 +21,49 @@ namespace NodeModelCanvas
 
         void UpdateResizerGrid()
         {
-            var x1 = _selector.GridPoint1.X;
-            var y1 = _selector.GridPoint1.Y;
-            var x2 = _selector.GridPoint2.X;
-            var y2 = _selector.GridPoint2.Y;
+            var (top, left, width, height) = GetResizerParams();
 
-            var dx = x2 - x1;
-            var dy = y2 - y1;
+            var margin = ResizerBorder.Margin;
 
-            var width = dx > 0 ? dx : -dx;
-            var height = dy > 0 ? dy : -dy;
-            var margin = SelectorBorder.Margin;
+            ResizerGrid.Width = width + margin.Left + margin.Right;
+            ResizerGrid.Height = height + margin.Top + margin.Bottom;
 
-            ResizerGrid.Width = width + margin.Right;
-            ResizerGrid.Height = height;
-
-            var top = y1 < y2 ? y1 : y2;
-            var left = x1 < x2 ? x1 : x2;
-
-            Canvas.SetTop(ResizerGrid, top);
-            Canvas.SetLeft(ResizerGrid, left);
+            Canvas.SetTop(ResizerGrid, top - margin.Top);
+            Canvas.SetLeft(ResizerGrid, left - margin.Left);
         }
 
         #region Resizer_PointerEvents  =========================================
-        private void SizerTopLeft_PointerEntered(object sender, PointerRoutedEventArgs e)
+        private void Sizer_PointerExited(object sender, PointerRoutedEventArgs e) => ConditionalySetNewCursor(CoreCursorType.Arrow);
+
+        private void SizerTop_PointerEntered(object sender, PointerRoutedEventArgs e) => ConditionalySetNewCursor(CoreCursorType.SizeNorthSouth);
+        private void SizerLeft_PointerEntered(object sender, PointerRoutedEventArgs e) => ConditionalySetNewCursor(CoreCursorType.SizeWestEast);
+        private void SizerRight_PointerEntered(object sender, PointerRoutedEventArgs e) => ConditionalySetNewCursor(CoreCursorType.SizeWestEast);
+        private void SizerBottom_PointerEntered(object sender, PointerRoutedEventArgs e) => ConditionalySetNewCursor(CoreCursorType.SizeNorthSouth);
+
+        private void SizerTopLeft_PointerEntered(object sender, PointerRoutedEventArgs e) => ConditionalySetNewCursor(CoreCursorType.SizeNorthwestSoutheast);
+        private void SizerTopRight_PointerEntered(object sender, PointerRoutedEventArgs e) => ConditionalySetNewCursor(CoreCursorType.SizeNortheastSouthwest);
+        private void SizerBottomLeft_PointerEntered(object sender, PointerRoutedEventArgs e) => ConditionalySetNewCursor(CoreCursorType.SizeNortheastSouthwest);
+        private void SizerBottomRight_PointerEntered(object sender, PointerRoutedEventArgs e) => ConditionalySetNewCursor(CoreCursorType.SizeNorthwestSoutheast);
+
+        void ConditionalySetNewCursor(CoreCursorType cursorType) { if (_pointerIsPressed) return; TrySetNewCursor(cursorType); }
+
+        private void SizerTop_PointerPressed(object sender, PointerRoutedEventArgs e) { if (Event_Action.TryGetValue(EventType.TopHit, out Action action)) ExecuteSizeHit(e, action); }
+        private void SizerLeft_PointerPressed(object sender, PointerRoutedEventArgs e) { if (Event_Action.TryGetValue(EventType.LeftHit, out Action action)) ExecuteSizeHit(e, action); }
+        private void SizerRight_PointerPressed(object sender, PointerRoutedEventArgs e) { if (Event_Action.TryGetValue(EventType.RightHit, out Action action)) ExecuteSizeHit(e, action); }
+        private void SizerBottom_PointerPressed(object sender, PointerRoutedEventArgs e) { if (Event_Action.TryGetValue(EventType.BottomHit, out Action action)) ExecuteSizeHit(e, action); }
+        private void SizerTopLeft_PointerPressed(object sender, PointerRoutedEventArgs e) { if (Event_Action.TryGetValue(EventType.TopLeftHit, out Action action)) ExecuteSizeHit(e, action); }
+        private void SizerTopRight_PointerPressed(object sender, PointerRoutedEventArgs e) { if (Event_Action.TryGetValue(EventType.TopRightHit, out Action action)) ExecuteSizeHit(e, action); }
+        private void SizerBottomLeft_PointerPressed(object sender, PointerRoutedEventArgs e) { if (Event_Action.TryGetValue(EventType.BottomLeftHit, out Action action)) ExecuteSizeHit(e, action); }
+        private void SizerBottomRight_PointerPressed(object sender, PointerRoutedEventArgs e) { if (Event_Action.TryGetValue(EventType.BottomRightHit, out Action action)) ExecuteSizeHit(e, action); }
+
+        private void ExecuteSizeHit(PointerRoutedEventArgs e, Action action)
         {
-            TrySetNewCursor(CoreCursorType.SizeNorthwestSoutheast);
-        }
-
-        private void SizerTopLeft_PointerExited(object sender, PointerRoutedEventArgs e)
-        {
-            RestorePointerCursor();
-        }
-
-        private void SizerTopLeft_PointerPressed(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-        private void SizerTopLeft_PointerMoved(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-        private void SizerTopLeft_PointerReleased(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-
-
-
-        private void SizerTopCenter_PointerEntered(object sender, PointerRoutedEventArgs e)
-        {
-            TrySetNewCursor(CoreCursorType.SizeNorthSouth);
-        }
-
-        private void SizerTopCenter_PointerExited(object sender, PointerRoutedEventArgs e)
-        {
-            RestorePointerCursor();
-        }
-
-        private void SizerTopCenter_PointerPressed(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-        private void SizerTopCenter_PointerMoved(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-        private void SizerTopCenter_PointerReleased(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-
-
-
-        private void SizerTopRight_PointerEntered(object sender, PointerRoutedEventArgs e)
-        {
-            TrySetNewCursor(CoreCursorType.SizeNortheastSouthwest);
-        }
-
-        private void SizerTopRight_PointerExited(object sender, PointerRoutedEventArgs e)
-        {
-            RestorePointerCursor();
-        }
-
-        private void SizerTopRight_PointerPressed(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-        private void SizerTopRight_PointerMoved(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-        private void SizerTopRight_PointerReleased(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-
-
-
-        private void SizerBottomLeft_PointerEntered(object sender, PointerRoutedEventArgs e)
-        {
-            TrySetNewCursor(CoreCursorType.SizeNortheastSouthwest);
-        }
-
-        private void SizerBottomLeft_PointerExited(object sender, PointerRoutedEventArgs e)
-        {
-            RestorePointerCursor();
-        }
-
-        private void SizerBottomLeft_PointerPressed(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-        private void SizerBottomLeft_PointerMoved(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-        private void SizerBottomLeft_PointerReleased(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-
-
-
-        private void SizerBottomCenter_PointerEntered(object sender, PointerRoutedEventArgs e)
-        {
-            TrySetNewCursor(CoreCursorType.SizeNorthSouth);
-        }
-
-        private void SizerBottomCenter_PointerExited(object sender, PointerRoutedEventArgs e)
-        {
-            RestorePointerCursor();
-        }
-
-        private void SizerBottomCenter_PointerPressed(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-        private void SizerBottomCenter_PointerMoved(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-        private void SizerBottomCenter_PointerReleased(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-
-
-
-        private void SizerBottomRight_PointerEntered(object sender, PointerRoutedEventArgs e)
-        {
-            TrySetNewCursor(CoreCursorType.SizeNorthwestSoutheast);
-        }
-
-        private void SizerBottomRight_PointerExited(object sender, PointerRoutedEventArgs e)
-        {
-            RestorePointerCursor();
-        }
-
-        private void SizerBottomRight_PointerPressed(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-        private void SizerBottomRight_PointerMoved(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-        private void SizerBottomRight_PointerReleased(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-
-
-
-        private void SizerCenterLeft_PointerEntered(object sender, PointerRoutedEventArgs e)
-        {
-            TrySetNewCursor(CoreCursorType.SizeWestEast);
-        }
-
-        private void SizerCenterLeft_PointerExited(object sender, PointerRoutedEventArgs e)
-        {
-            RestorePointerCursor();
-        }
-
-        private void SizerCenterLeft_PointerPressed(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-        private void SizerCenterLeft_PointerMoved(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-        private void SizerCenterLeft_PointerReleased(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-
-
-
-        private void SizerCenterRight_PointerEntered(object sender, PointerRoutedEventArgs e)
-        {
-            TrySetNewCursor(CoreCursorType.SizeWestEast);
-        }
-
-        private void SizerCenterRight_PointerExited(object sender, PointerRoutedEventArgs e)
-        {
-            RestorePointerCursor();
-        }
-
-        private void SizerCenterRight_PointerPressed(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-        private void SizerCenterRight_PointerMoved(object sender, PointerRoutedEventArgs e)
-        {
-        }
-
-        private void SizerCenterRight_PointerReleased(object sender, PointerRoutedEventArgs e)
-        {
+            e.Handled = true;
+            _pointerIsPressed = true;
+            HideTootlip();
+            action();
         }
         #endregion
-
-
 
         #region PointerCursor  ================================================
         private void RestorePointerCursor() => TrySetNewCursor(CoreCursorType.Arrow);
