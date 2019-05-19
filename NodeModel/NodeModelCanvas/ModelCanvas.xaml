@@ -32,11 +32,11 @@
         </Style>
 
         <Style x:Key="ResizeHandelStyle" TargetType="Border">
-            <Setter Property="Width" Value="8"/>
-            <Setter Property="Height" Value="8"/>
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Height" Value="10"/>
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="Black"/>
-            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderThickness" Value="2"/>
         </Style>
     </UserControl.Resources>
 
@@ -68,7 +68,7 @@
                     PointerReleased="RootCanvas_PointerReleased">
 
 
-                <Grid x:Name="RegionGrid" Background="Transparent" Visibility="Collapsed">
+                <Grid x:Name="SelectorGrid" Background="Transparent" Visibility="Collapsed">
                     <Border  BorderThickness="1" BorderBrush="White" Margin="0" />
                     <Border  BorderThickness="1" BorderBrush="CornflowerBlue" Margin="1"/>
                     <Border  BorderThickness="1" BorderBrush="White" Margin="2" />
@@ -81,7 +81,7 @@
                     </StackPanel>
                 </Border>
 
-                <Grid x:Name="SelectorGrid" Background="Transparent" Width="100" Height="40" Visibility="Collapsed">
+                <Grid x:Name="AlignmentGrid" Background="Transparent" Width="100" Height="40" Visibility="Collapsed">
 
                     <Button HorizontalAlignment="Right" VerticalAlignment="Top" Padding="0" Margin="-2,0,0,0" Width="12" Height="16" Background="White" ToolTipService.ToolTip="Show Menu" BorderThickness="0,2,2,2" BorderBrush="Blue">
                         <FontIcon Glyph="&#xE937;" Margin="2,0,0,0" FontSize="10" FontWeight="ExtraBlack" FontFamily="Segoe MDL2 Assets" Foreground="Black"/>

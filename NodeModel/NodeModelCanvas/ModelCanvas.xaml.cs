@@ -280,7 +280,7 @@ namespace NodeModelCanvas
             {
                 if (SetState(StateType.ViewIdle))
                 {
-                    HideRegionGrid();
+                    HideSelectorGrid();
                     RestorePointerCursor();
                     SetEventAction(EventType.Tap, ViewIdle_TapHitTest);
                     SetEventAction(EventType.Skim, ViewIdle_SkimHitTest);
@@ -324,7 +324,7 @@ namespace NodeModelCanvas
             else
             {
                 HideResizerGrid();
-                HideSelectorGrid();
+                HideAlignmentGrid();
                 HideTootlip();
                 SetViewOnVoidTap();
                 _selector.HidePropertyPanel();
@@ -343,19 +343,19 @@ namespace NodeModelCanvas
         {
             if (SetState(StateType.ViewOnVoidDrag))
             {
-                ShowRegionGrid();
+                ShowSelectorGrid();
                 SetEventAction(EventType.End, RegionTraceEnd);
                 SetEventAction(EventType.Drag, TracingRegion);
             }
         }
         void RegionTraceEnd()
         {
-            ShowSelectorGrid();
+            ShowAlignmentGrid();
             SetViewIdle();
         }
         void TracingRegion()
         {
-            UpdateRegionGrid();
+            UpdateSelectorGrid();
         }
         #endregion
 
@@ -500,17 +500,97 @@ namespace NodeModelCanvas
         {
             if (SetState(StateType.MoveIdle))
             {
+                RestorePointerCursor();
+                HideResizerGrid();
+                HideTootlip();
+                HideSelectorGrid();
+                SetEventAction(EventType.Skim, MoveIdle_SkimHitTest);
+                SetEventAction(EventType.Tap, MoveIdle_TapHitTest);
+                SetEventAction(EventType.End, SetMoveIdle);
             }
+        }
+        async void MoveIdle_SkimHitTest()
+        {
+            var anyHit = false;
+            await _dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { anyHit = _selector.SkimHitTest(); });
+            if (anyHit)
+            {
+                if (_selector.IsHitRegion || _selector.IsHitNode)
+                {
+                    TrySetNewCursor(CoreCursorType.Hand);
+                }
+            }
+            else
+            {
+                RestorePointerCursor();
+            }
+        }
+        async void MoveIdle_TapHitTest()
+        {
+            var anyHit = false;
+            await _dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { anyHit = _selector.TapHitTest(); });
+            if (anyHit)
+            {
+                if (_selector.IsHitRegion || _selector.IsHitNode)
+                {
+                    TrySetNewCursor(CoreCursorType.SizeAll);
+                    if (_selector.IsHitRegion)
+                        SetMoveRegionDrag();
+                    else if (_selector.IsHitNode)
+                        SetMoveNodeDrag();
+                }
+                else
+                {
+                    RestorePointerCursor();
+                }
+            }
+        }
+        void SetMoveNodeDrag()
+        {
+            if (SetState(StateType.MoveOnRegionDrag))
+            {
+                SetEventAction(EventType.Drag, MovingNode);
+                SetEventAction(EventType.End, SetMoveIdle);
+            }
+        }
+        async void MovingNode()
+        {
+            var ok = false;
+            await _dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { ok = _selector.MoveNode(); });
+            if (ok)
+            {
+                EditorCanvas.Invalidate();
+            }
+        }
+        void SetMoveRegionDrag()
+        {
+            if (SetState(StateType.MoveOnRegionDrag))
+            {
+                SetEventAction(EventType.Drag, MovingRegion);
+                SetEventAction(EventType.End, SetMoveIdle);
+            }
+        }
+        async void MovingRegion()
+        {
+
         }
         #endregion
 
         #region Mode_Create  ==================================================
         void SetCreateIdle()
         {
-            if (SetState(StateType.CreateTap))
+            if (SetState(StateType.CreateIdle))
             {
+                SetEventAction(EventType.Tap, CreateNewNode);
             }
         }
+        async void CreateNewNode()
+        {
+            var ok = false;
+            await _dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { ok = _selector.CreateNode(); });
+            EditorCanvas.Invalidate();
+            ViewSelect.IsChecked = true;
+        }        
         #endregion
 
         #region Mode_Link  ====================================================

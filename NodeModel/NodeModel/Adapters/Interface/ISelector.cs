@@ -29,6 +29,8 @@ namespace NodeModel
         bool SkimHitTest();
         bool DragHitTest();
 
+        bool RegionNodeHitTest();
+
         void ShowPropertyPanel();
         void HidePropertyPanel();
 
@@ -56,6 +58,9 @@ namespace NodeModel
         void ResizePropagate();
 
         void RefreshCanvasDrawData();
+
+        bool MoveNode();
+        bool MoveRegion();
 
         bool CreateNode();
 

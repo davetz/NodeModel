@@ -261,6 +261,9 @@ namespace NodeModel
         internal bool HitEdgeFarEnd;
         internal (float X, float Y) ResizeCenter;
 
+        internal List<TableX> RegionHitTableX = new List<TableX>();
+        override public bool RegionNodeHitTest() => ChefRef.RegionTableXHitTest(DrawPoint1, DrawPoint2, RegionHitTableX);
+
         public override void HidePropertyPanel() => SetTableX(null);
         public override void ShowPropertyPanel() => SetTableX(TapHitTableX);
 
@@ -314,6 +317,24 @@ namespace NodeModel
         }
         #endregion
 
+        #region MoveNode  =====================================================
+        public override bool MoveNode()
+        {
+            if (TapHitTableX is null) return false;
+
+            TapHitTableX.Center = (DrawPoint2.X, DrawPoint2.Y);
+            RefreshCanvasDraw();
+            return true;
+        }
+        #endregion
+
+        #region MoveRegion  ===================================================
+        public override bool MoveRegion()
+        {
+            return false;
+        }
+        #endregion
+
         #region CreateNode  ===================================================
         override public bool CreateNode()
         {
@@ -321,9 +342,10 @@ namespace NodeModel
 
             var tx = ChefRef.CreateTableX();
             tx.Center = (DrawPoint1.X, DrawPoint1.Y);
+            tx.Name = "New";
+            tx.ToolTip = "new node type";
             RefreshCanvasDraw();
             SetTableX(tx);
-
             return true;
         }
         #endregion

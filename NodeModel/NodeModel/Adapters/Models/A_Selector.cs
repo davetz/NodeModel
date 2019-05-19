@@ -22,12 +22,16 @@ namespace NodeModel
             _model = model;
         }
 
+        abstract public bool MoveNode();
+        abstract public bool MoveRegion();
         abstract public bool CreateNode();
 
         abstract public bool TapHitTest();
         abstract public bool EndHitTest();
         abstract public bool SkimHitTest();
         abstract public bool DragHitTest();
+
+        abstract public bool RegionNodeHitTest();
 
         abstract public void ShowPropertyPanel();
         abstract public void HidePropertyPanel();
@@ -40,10 +44,10 @@ namespace NodeModel
         abstract public void ResizeTopRight();
         abstract public void ResizeBottomLeft();
         abstract public void ResizeBottomRight();
+        abstract public void ResizePropagate();
 
         abstract public void RefreshCanvasDrawData();
 
-        abstract public void ResizePropagate();
 
         #region HitTest  ======================================================
         internal HitType Hit;
